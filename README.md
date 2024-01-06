@@ -21,4 +21,4 @@ https://app.clear.ml/projects/32a733134a5743739ce9d6719b94c5b3/experiments/2c8c7
 
 ## Test data segmentation mask example
 
-![alt text](https://github.com/ArtemVerbov/ImageClassification/blob/main/media/confusion_matrix.png?raw=true)
+![alt text](https://github.com/ArtemVerbov/Image-Segmentation-X-Lightning/blob/main/media/masksData.png?raw=true)
