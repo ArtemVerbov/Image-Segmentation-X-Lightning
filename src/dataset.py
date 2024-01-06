@@ -1,18 +1,17 @@
 import os
-from typing import Tuple
-import torch
-from torch import Tensor
-import numpy as np
-from torch.utils.data import Dataset
+from pathlib import Path
+from typing import Optional, Tuple
+
+import albumentations as albu
 import cv2
 from numpy.typing import NDArray
-from torchvision.datasets import ImageFolder, DatasetFolder
-from transforms import Transforms
+from torch import Tensor, clip
+from torch.utils.data import Dataset
 
 
 class SegmentationDataset(Dataset):
 
-    def __init__(self, image_paths, transforms):
+    def __init__(self, image_paths: Path, transforms: Optional[albu.Compose] = None):
         self.imagePaths = image_paths
         self.transforms = transforms
 
@@ -21,44 +20,32 @@ class SegmentationDataset(Dataset):
 
         self.subdir_names = os.listdir(self.imagePaths)
 
-    def __len__(self):
+    def __len__(self) -> int:
         # return the number of total samples contained in the dataset
         return len(self.subdir_names)
 
     def __getitem__(self, idx) -> Tuple[Tensor, Tensor]:
         base_path = self.imagePaths / self.subdir_names[idx]
         image_path = str(base_path / 'images' / f'{self.subdir_names[idx]}.png')
-
-        mask = self.get_mask(base_path)/255.0
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        transformed = self.transforms(image=image, mask=mask)
 
-        return transformed['image'].float(), transformed['mask'].float().unsqueeze(0)
+        try:
+            mask = self.get_mask(base_path)
+            transformed = self.transforms(image=image, mask=mask)
+            mask = clip(transformed['mask'], 0, 1).float().unsqueeze(0)
+        except FileNotFoundError:
+            transformed = self.transforms(image=image)
+            mask = 0
 
+        return transformed['image'].float(), mask
+
+    # noinspection PyTypeChecker
     @staticmethod
-    def get_mask(path):
+    def get_mask(path) -> NDArray:
         path = path / 'masks'
-        masks_list = list()
+        masks_list = []
         for mask_part in os.listdir(path):
             mask = cv2.imread(str(path / mask_part), cv2.IMREAD_GRAYSCALE)
             masks_list.append(mask)
         return sum(masks_list)
-
-
-if __name__ == '__main__':
-    from pathlib import Path
-    from typing import Dict, Optional
-
-    import torch
-    from clearml import Dataset as ClearmlDataset
-
-    data_path = Path(ClearmlDataset.get(dataset_name='image_segmentation_dataset').get_local_copy())
-    trans = Transforms(64, 64).compose('fit')
-    data = SegmentationDataset(data_path / 'train', trans)
-
-    for i in iter(data):
-        print(i)
-        break
-    # print(next(iter(data)))
-

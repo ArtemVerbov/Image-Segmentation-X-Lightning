@@ -56,8 +56,7 @@ class ProjectConfig:
 
 
 @dataclass(config=ConfigDict(extra='forbid', validate_assignment=True))
-class ModelConfig:
-    model: str
+class LightningModuleConfig:
     optimizer_frequency: int = 3
     interval: str = 'epoch'
     monitor: str = 'mean_valid_loss'
@@ -65,20 +64,20 @@ class ModelConfig:
 
 @dataclass(config=ConfigDict(extra='forbid', validate_assignment=True))
 class ExperimentConfig:
-    model_config: ModelConfig = field(default=ModelConfig)
+    lightning_module_config: LightningModuleConfig = field(default=LightningModuleConfig)
     data_config: DataConfig = field(default=DataConfig)
     trainer_config: TrainerConfig = field(default=TrainerConfig)
     project_config: ProjectConfig = field(default=ProjectConfig)
 
     @model_validator(mode='after')
     def scheduler_monitor_check(self) -> 'ExperimentConfig':
-        if 'valid' in self.model_config.monitor:
-            assert (self.model_config.optimizer_frequency % self.trainer_config.check_val_every_n_epoch == 0
-                    ), """If "monitor" references validation metric/loss "model_config.optimizer_frequency" parameter
+        if 'valid' in self.lightning_module_config.monitor:
+            assert (self.lightning_module_config.optimizer_frequency % self.trainer_config.check_val_every_n_epoch == 0
+                    ), """If "monitor" references validation metric/loss "lightning_module_config.optimizer_frequency" parameter
              should be set to a multiple of "trainer_config.check_val_every_n_epoch."""
 
-        if 'mean' in self.model_config.monitor:
-            assert (self.model_config.interval == 'epoch'
-                    ), """If "monitor" references any "mean" metric/loss "model_config.interval"
+        if 'mean' in self.lightning_module_config.monitor:
+            assert (self.lightning_module_config.interval == 'epoch'
+                    ), """If "monitor" references any "mean" metric/loss "lightning_module_config.interval"
                     should be set to "epoch"""
         return self

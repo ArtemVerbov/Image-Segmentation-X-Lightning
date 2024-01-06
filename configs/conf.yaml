@@ -5,22 +5,29 @@ optimizer:
 scheduler:
   _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
   _partial_: true
-  patience: 1
+  patience: 3
   verbose: true
+model:
+  _target_: segmentation_models_pytorch.Unet
+  _partial_: true
+  encoder_name: resnet34
+  encoder_weights: imagenet
+  in_channels: 3
+  classes: 1
+  activation: sigmoid
 experiment_config:
   _target_: src.config.ExperimentConfig
-  model_config:
-    _target_: src.config.ModelConfig
-    model: resnet18
-    optimizer_frequency: 2
+  lightning_module_config:
+    _target_: src.config.LightningModuleConfig
+    optimizer_frequency: 5
     interval: epoch
     monitor: mean_valid_loss
   data_config:
     _target_: src.config.DataConfig
     dataset_name: image_segmentation_dataset
     img_size:
-    - 64
-    - 64
+    - 256
+    - 256
     batch_size: 32
     data_split:
     - 0.8
@@ -31,8 +38,8 @@ experiment_config:
   trainer_config:
     _target_: src.config.TrainerConfig
     min_epochs: 5
-    max_epochs: 8
-    check_val_every_n_epoch: 2
+    max_epochs: 80
+    check_val_every_n_epoch: 5
     log_every_n_steps: 1
     gradient_clip_val: null
     gradient_clip_algorithm: null
