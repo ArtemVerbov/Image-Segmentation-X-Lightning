@@ -3,14 +3,14 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 import torch.nn.functional as func
 from lightning import LightningModule
 from torch import Tensor
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchmetrics import MeanMetric
 
 from src.metrics import get_metrics
 
 if TYPE_CHECKING:
     from segmentation_models_pytorch import Unet
-    from torch.optim import Adam
+    from torch.optim import Optimizer
+    from torch.optim.lr_scheduler import LRScheduler
 
     from src.config import LightningModuleConfig
 
@@ -21,8 +21,8 @@ class SegmentationLightningModule(LightningModule):  # noqa: WPS214
         model: 'Unet',
         module_cfg: 'LightningModuleConfig',
         # class_to_idx: Dict[str, int],
-        optimizer: 'Adam',
-        scheduler: Optional['ReduceLROnPlateau'] = None,
+        optimizer: 'Optimizer',
+        scheduler: Optional['LRScheduler'] = None,
     ):
         super().__init__()
         metrics = get_metrics()

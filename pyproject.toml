@@ -22,8 +22,6 @@ rootutils = "^1.0.7"
 mypy = "^1.8.0"
 flake8 = "^7.0.0"
 wemake-python-styleguide = "^0.18.0"
-black = "^23.12.1"
-autopep8 = "^2.0.4"
 pandas = "^2.1.4"
 
 
