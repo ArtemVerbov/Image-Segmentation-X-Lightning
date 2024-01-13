@@ -21,8 +21,8 @@ from src.lightning_module import SegmentationLightningModule
 if TYPE_CHECKING:
     from omegaconf import DictConfig
     from segmentation_models_pytorch import Unet
-    from torch.optim import Adam
-    from torch.optim.lr_scheduler import ReduceLROnPlateau
+    from torch.optim import Optimizer
+    from torch.optim.lr_scheduler import LRScheduler
 
 
 # noinspection PyDataclass
@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 def train(cfg: 'DictConfig'):  # noqa: WPS210
 
     experiment_config: ExperimentConfig = hydra.utils.instantiate(cfg.experiment_config)
-    opt: 'Adam' = hydra.utils.instantiate(cfg.optimizer)
-    scheduler: 'ReduceLROnPlateau' = hydra.utils.instantiate(cfg.scheduler)
+    opt: 'Optimizer' = hydra.utils.instantiate(cfg.optimizer)
+    scheduler: 'LRScheduler' = hydra.utils.instantiate(cfg.scheduler)
     segmentation_model: 'Unet' = hydra.utils.instantiate(cfg.model)
 
     lightning.seed_everything(0)
@@ -80,6 +80,7 @@ def train(cfg: 'DictConfig'):  # noqa: WPS210
         datamodule=datamodule,
         ckpt_path='best',
     )
+
 
 if __name__ == '__main__':
     train()
