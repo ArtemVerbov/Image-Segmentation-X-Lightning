@@ -2,7 +2,7 @@
 name = "imagesegmentation"
 version = "0.1.0"
 description = ""
-authors = ["Artem Verbov <artem.verbov.osv@fedex.com>"]
+authors = ["Artem Verbov"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
